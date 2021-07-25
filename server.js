@@ -25,6 +25,11 @@ app.use(express.json());
 app.use(cors({ origin: process.env.CLIENT, credentials: true }));
 app.use(cookieParser());
 
+const https = require('https').createServer(app)
+
+// Create peer server
+ExpressPeerServer(https, { path: '/' })
+
 app.post('/sendOTP', (req, res) => {
 	try {
 
@@ -168,6 +173,6 @@ if(process.env.NODE_ENV === 'production'){
 // app.listen(process.env.PORT || 8888);
 
 const port = process.env.PORT || 8888
-app.listen(port, () => {
+https.listen(port, () => {
     console.log('Server is running on port', port)
 })
