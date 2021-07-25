@@ -28,7 +28,7 @@ app.use(cookieParser());
 const https = require('https').createServer(app)
 
 // Create peer server
-ExpressPeerServer(https, { path: '/' })
+// ExpressPeerServer(https, { path: '/' })
 
 app.post('/sendOTP', (req, res) => {
 	try {
