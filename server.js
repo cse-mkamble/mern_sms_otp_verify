@@ -173,6 +173,6 @@ if(process.env.NODE_ENV === 'production'){
 // app.listen(process.env.PORT || 8888);
 
 const port = process.env.PORT || 8888
-https.listen(port, () => {
+app.listen(port, () => {
     console.log('Server is running on port', port)
 })
