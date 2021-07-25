@@ -3,6 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const { ExpressPeerServer } = require('peer')
+const path = require('path')
 
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
@@ -22,6 +24,11 @@ app.use(express.json());
 
 app.use(cors({ origin: process.env.CLIENT, credentials: true }));
 app.use(cookieParser());
+
+const https = require('https').createServer(app)
+
+// Create peer server
+ExpressPeerServer(https, { path: '/' })
 
 app.post('/sendOTP', (req, res) => {
 	try {
@@ -163,4 +170,9 @@ if(process.env.NODE_ENV === 'production'){
     })
 }
 
-app.listen(process.env.PORT || 8888);
+// app.listen(process.env.PORT || 8888);
+
+const port = process.env.PORT || 8888
+https.listen(port, () => {
+    console.log('Server is running on port', port)
+})
