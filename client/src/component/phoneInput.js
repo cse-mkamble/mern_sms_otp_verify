@@ -1,12 +1,14 @@
 import React from 'react';
 import styles from './styles/style.module.css';
 import axios from 'axios';
+import { BASE_URL } from "../config";
+
 function PhoneInput(props) {
 	const { value, handleChange, hashHandleChange } = props;
 
 	const Continue = (e) => {
 		axios
-			.post('http://localhost:8888/sendOTP', {
+			.post(`${BASE_URL}/sendOTP`, {
 				phone: `${value.phone}`
 			})
 			.then(function(res) {

@@ -20,36 +20,41 @@ let refreshTokens = [];
 const app = express();
 app.use(express.json());
 
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT, credentials: true }));
 app.use(cookieParser());
 
 app.post('/sendOTP', (req, res) => {
-	const phone = req.body.phone;
-	const otp = Math.floor(100000 + Math.random() * 900000);
-	const ttl = 2 * 60 * 1000;
-	const expires = Date.now() + ttl;
-	const data = `${phone}.${otp}.${expires}`;
-	const hash = crypto.createHmac('sha256', smsKey).update(data).digest('hex');
-	const fullHash = `${hash}.${expires}`;
+	try {
 
-	client.messages
-		.create({
-			body: `Your One Time Login Password For CFM is ${otp}`,
-			from: twilioNum,
-			to: phone
-		})
-		.then((messages) => console.log(messages))
-		.catch((err) => console.error(err));
+		const phone = req.body.phone;
+		const otp = Math.floor(100000 + Math.random() * 900000);
+		const ttl = 2 * 60 * 1000;
+		const expires = Date.now() + ttl;
+		const data = `${phone}.${otp}.${expires}`;
+		const hash = crypto.createHmac('sha256', smsKey).update(data).digest('hex');
+		const fullHash = `${hash}.${expires}`;
 
-	// res.status(200).send({ phone, hash: fullHash, otp });  // this bypass otp via api only for development instead hitting twilio api all the time
-	res.status(200).send({ phone, hash: fullHash });          // Use this way in Production
+		client.messages
+			.create({
+				body: `Your One Time Login Password is ${otp}`,
+				from: process.env.TWILIO_PHONE_NUMBER,
+				to: phone
+			})
+			.then((messages) => console.log(messages))
+			.catch((err) => console.error(err));
+
+		// res.status(200).send({ phone, hash: fullHash, otp });  // this bypass otp via api only for development instead hitting twilio api all the time
+		res.status(200).send({ phone, hash: fullHash });          // Use this way in Production
+	} catch (error) {
+		console.log(error)
+	}
 });
 
 app.post('/verifyOTP', (req, res) => {
 	const phone = req.body.phone;
 	const hash = req.body.hash;
 	const otp = req.body.otp;
-	let [ hashValue, expires ] = hash.split('.');
+	let [hashValue, expires] = hash.split('.');
 
 	let now = Date.now();
 	if (now > parseInt(expires)) {
@@ -150,5 +155,12 @@ app.get('/logout', (req, res) => {
 		.clearCookie('refreshTokenID')
 		.send('logout');
 });
+
+if(process.env.NODE_ENV === 'production'){
+    app.use(express.static('client/build'))
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
+    })
+}
 
 app.listen(process.env.PORT || 8888);

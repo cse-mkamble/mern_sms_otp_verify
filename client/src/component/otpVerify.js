@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './styles/style.module.css';
 import axios from 'axios';
+import { BASE_URL } from "../config";
 
 function OtpVerify(props) {
 	axios.defaults.withCredentials = true;
@@ -17,7 +18,7 @@ function OtpVerify(props) {
 
 	const confirmOtp = () => {
 		axios
-			.post('http://localhost:8888/verifyOTP', {
+			.post(`${BASE_URL}/verifyOTP`, {
 				phone: `${value.phone}`,
 				hash: `${value.hash}`,
 				otp: `${value.otp}`,
